@@ -22,7 +22,7 @@
                 <h1 class="text-2xl font-bold">116 國中數學(一)會考非選與歷屆特訓</h1>
                 <p class="text-blue-100 text-sm mt-1">分章自我檢測系統 • 每回隨機抽測：15 題選擇 ＋ 5 題非選</p>
             </div>
-            <span class="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold">完整版題庫</span>
+            <span class="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold">116 專用錯題自評版</span>
         </div>
     </header>
 
@@ -98,12 +98,23 @@
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800">測驗挑戰完成！</h2>
                 <p class="text-slate-500 mt-2">選擇題答對率：<span id="score-text" class="text-blue-600 font-bold text-xl">0%</span></p>
-                <p class="text-slate-400 text-xs mt-1">（非選擇題由於重視計算步驟，請對照下方會考三點評分指引進行自我評分）</p>
+                <p class="text-slate-400 text-xs mt-1">（請參考下方「錯題分析」與「非選擇題自評」重修不熟的觀念喔！）</p>
                 <button onclick="initQuizSetup()" class="mt-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-6 py-2 rounded-xl transition-all">返回首頁選擇章節</button>
             </div>
 
-            <!-- 非選擇題自評區 -->
-            <div class="bg-white rounded-2xl shadow-sm p-8 border border-slate-100 space-y-8">
+            <!-- ❌ 選擇題錯題分析區 -->
+            <div id="wrong-analysis-card" class="bg-white rounded-2xl shadow-sm p-8 border border-slate-100 space-y-6 hidden">
+                <h3 class="text-lg font-bold text-slate-800 border-b pb-3 flex items-center gap-2">
+                    <span class="text-red-600">❌ 選擇題錯題分析與觀念重建</span>
+                    <span class="text-xs font-normal text-slate-400">（特別針對答錯的題目進行解析與複習）</span>
+                </h3>
+                <div id="wrong-analysis-container" class="space-y-6">
+                    <!-- 錯題分析對照動態生成 -->
+                </div>
+            </div>
+
+            <!-- 📝 非選擇題自評區 -->
+            <div id="non-mcq-card" class="bg-white rounded-2xl shadow-sm p-8 border border-slate-100 space-y-8 hidden">
                 <h3 class="text-lg font-bold text-slate-800 border-b pb-3 flex items-center gap-2">
                     <span>📝 非選擇題「算式對照」與自評</span>
                     <span class="text-xs font-normal text-slate-400">（請根據會考閱卷規範檢視自己的邏輯喔！）</span>
@@ -119,8 +130,7 @@
         /************************************************************
          * 【116 國中數學第一冊 CH1 ~ CH3 完整模擬題庫】
          * - 您隨時可以在這此物件中自行抽換、擴充或刪減題目欄位。
-         * - 試題來源(source) 與 試題提示(hint) 已全數嵌入。
-         * - 完美支援 LaTeX 數學排版。
+         * - 支援 LaTeX 數學排版。
          ************************************************************/
         const quizDatabase = {
             "ch1": {
@@ -155,7 +165,7 @@
                         "opts": ["9", "27", "279", "407"], 
                         "ans": 2, 
                         "source": "100 年第一次基測第 11 題",
-                        "hint": "個別算出乘方的值再相加。\\(7^3 = 7 \\times 7 \\times 7\\) ； \\((－4)^3 = (－4) \\times (－4) \\times (－4)\\)。" ,
+                        "hint": "個別算出乘方的值再相加。\\(7^3 = 7 \\times 7 \\times 7 = 343\\) ； \\((－4)^3 = (－4) \\times (－4) \\times (－4) = －64\\)。" ,
                         "exp": "原式＝\\(343－64＝279\\)。" 
                     },
                     { 
@@ -191,37 +201,29 @@
                         "exp": "原式＝\\([－9＋3]÷6－4 ＝ (－6)÷6－4 ＝ －1－4 ＝ －5\\)。" 
                     },
                     { 
-                        "q": "下列哪一個等式是正確的？", 
-                        "opts": ["\\(2^3－(－2)^3＝0\\)", "\\(2^4－(－2^4)＝0\\)", "\\((－2)^3－(－2^3)＝0\\)", "\\((－2)^4－(－2^4)＝0\\)"], 
-                        "ans": 2, 
-                        "source": "91 年第二次基測第 22 題",
-                        "hint": "各別將選項展開計算。注意偶次方如 \\((－2)^4=16\\) 而 \\(－2^4=－16\\)；奇次方如 \\((－2)^3=－8\\) 且 \\(－2^3=－8\\)。",
-                        "exp": "\\((－2)^3－(－2^3) ＝ －8 － (－8) ＝ 0\\)，故選 C。" 
-                    },
-                    { 
-                        "q": "計算 \\(19－(－2)×[(－12)－7]\\) 之值為何？", 
-                        "opts": ["－1", "－19", "19", "47"], 
+                        "q": "根據規律：\\(1 + 3 = 2^2\\)，\\(1 + 3 + 5 = 3^2\\)。若 \\(1 + 3 + 5 + 7 + 9 + 11 + 13 = k^2\\)，且 \\(k > 0\\)，則 \\(k\\) 的值為何？", 
+                        "opts": ["13", "7", "49", "14"], 
                         "ans": 1, 
-                        "source": "96 年第一次基測第 14 題",
-                        "hint": "優先計算中括號內的減法：\\((－12)－7 = －19\\)，再將其與 \\((－2)\\) 相乘，最後用 19 減去乘積結果。",
-                        "exp": "原式＝\\(19－(－2)×(－19)＝19－38＝－19\\)。" 
+                        "source": "會考非選模擬篇 CH1 規律推導",
+                        "hint": "規律：『連續奇數相加的總和，等於項數（數字個數）的平方』。數數看從 1 加到 13 總共有幾個奇數相加呢？",
+                        "exp": "從 1 開始的連續奇數相加，其總和會等於『項數（總共有幾個數字）』的平方。共有 7 個奇數相加，故總和為 7^2，得 k = 7。" 
                     }
                 ],
                 "nonMcq": [
                     {
-                        "q": "使用小型計算機，計算 \\((－3)^5\\) 時，可如此按鍵：□3、□+/-、□y^x、□5，最後按□=，結果顯示是－243。若在計算機上透過按□1、□1、□2、□+/-、□y^x 這五個鍵各一次（按鍵次序自己設計），最後按□=，所能得到的<b>最小數</b>是多少？請寫出求解過程。",
+                        "q": "使用小型計算機，計算 \\((－3)^5\\) 時，可如此按鍵：□3、□+/-、□y^x、□5，最後按□=，結果顯示是－243。若在計算機上透過按□1、□1、□2、□+/-、□y^x 這五個鍵各一次（按鍵次序自己設計），最後按□=，所能得到的<b>最小數</b>是多少？請寫出過程。",
                         "source": "會考非選模擬篇 CH1 第 1 題",
                         "hint": "要得到最小數（絕對值極大的負數），應設計以 2 為底數、11（由兩個1組成）為指數，並帶有負號的算式，即為 \\(－2^{11}\\) 的計算過程。",
                         "exp": "按鍵次序為□2、□+/-、□y^x、□1、□1、□=，即為算式 \\(－2^{11} ＝ －2048\\)。",
                         "rubric": [
                             "3 分：算式正確且求解過程合理，答案為 -2048 完整正確。",
-                            "2 分：算式正確，求解合理但計算錯誤，或部分步驟未呈現其相關性。",
+                            "2 分：算式正確，求解合理但出現計算錯誤，或部分步驟間沒有顯示其相關性。",
                             "1 分：算式只正確表示題目中部分數之關係，無完整求解過程。",
                             "0 分：空白或僅有答案，無任何合理之算式過程。"
                         ]
                     },
                     {
-                        "q": "小酷玩射飛鏢遊戲。已知小酷射了五支飛鏢且都中靶，鏢靶配分為：＋2、－7、＋8、＋12。若小酷共得了 27 分，則他的五支飛鏢分別射中多少分？請說明你的理由。",
+                        "q": "小酷玩射飛鏢遊戲。已知小酷射了五支飛鏢且都中靶，鏢靶配分為：＋2、－7、＋8、＋12。若小酷共得了 27 分，則他的五支飛鏢分別射中多少分？請說明理由。",
                         "source": "會考非選模擬篇 CH1 第 2 題",
                         "hint": "因為總分 27 分為奇數，配分中唯一為奇數的只有 －7 項目。因此 －7 的中靶次數必須是奇數支（可能為 1 支或 3 支）。試依此討論其餘四支鏢的組合！",
                         "exp": "因為總分 27 為奇數，負分項 －7 的個數必須為奇數支 (3 支以上總分小於0，不合)。<br>(1) 只有 1 支射中 －7：另外 4 支總分 ＝ \\(27 － (－7) ＝ 34\\) 分。另外 4 支在 2, 8, 12 中組合其和為 34，組合為 12, 12, 8, 2。<br>(2) 若有 3 支射中 －7：另外 2 支總分 ＝ \\(27 － 3×(－7) ＝ 48\\) 分。兩支鏢最大僅能為 \\(12 × 2 = 24\\) 分，不合。<br>答：五支飛鏢得分為 －7、12、12、8、2 分。",
@@ -231,88 +233,56 @@
                             "1 分：能經由嘗試找出正確答案，但完全未進行奇偶數情況的討論。",
                             "0 分：空白或僅寫出最終數字，沒有任何推導理由。"
                         ]
-                    },
-                    {
-                        "q": "已知 \\(2^1－2^0＝1，2^2－(2^0＋2^1)＝1，2^3－(2^0＋2^1＋2^2)＝1\\)。若 \\(2^{100}－(□＋2^{10}＋2^{11}＋2^{12}＋……＋2^{99})＝1\\)，則□的值為何？",
-                        "source": "會考非選模擬篇 CH1 第 3 題",
-                        "hint": "比對已知規律，任何指數 \\(2^n\\) 減去從 \\(2^0\\) 累加到 \\(2^{n-1}\\) 的和都會等於 1。故 \\(2^{100}\\) 減去 \\(2^0\\) 到 \\(2^{99}\\) 的累加和等於 1。對照題目中的算式，找出 □ 應為哪幾項的和？",
-                        "exp": "由已知規律，\\(2^{100}－(2^0＋2^1＋2^2＋……＋2^{99})＝1\\)。<br>比對題中等式，可知 □ 應等於前 10 項之和：<br>\\(□ ＝ 2^0＋2^1＋2^2＋……＋2^9\\)。<br>根據規律，\\(2^0＋2^1＋……＋2^9 ＝ 2^{10}－1 ＝ 1024－1 ＝ 1023\\)。",
-                        "rubric": [
-                            "3 分：解題策略適切，推理過程合理且完整，答案 1023 正確。",
-                            "2 分：能寫出 □ = 2^0 + 2^1 + ... + 2^9 = 2^10 - 1，但未能計算出 1023 終值。",
-                            "1 分：僅能列出 □ = 2^0 + 2^1 + ... + 2^9，無法進一步化簡。",
-                            "0 分：解題過程空白或與題目完全無關。"
-                        ]
                     }
                 ]
             },
             "ch2": {
-                "title": "CH2 分數的運算（含因數與倍數）",
+                "title": "CH2 分數的運算（含因倍數）",
                 "mcq": [
                     { 
                         "q": "若 \\(a、b、c\\) 均為質數，且 \\(a < b < c\\)，\\(a＋b＝25，b＋c＝54\\)，則 \\(c\\) 之值為何？", 
                         "opts": ["23", "29", "31", "41"], 
                         "ans": 2, 
                         "source": "會考非選模擬篇 CH2 第 4 題",
-                        "hint": "質數中除了 2 以外其餘皆為奇數。因為兩數和 \\(a+b=25\\) 為奇數，代表 \\(a、b\\) 之中必定有一數為偶數質數。偶數質數必為 2，依此求出 \\(b\\) 再求 \\(c\\)。",
-                        "exp": "\\(a+b=25\\)（奇數）⇒ \\(a、b\\) 中必有偶數質數，故最小質數 \\(a = 2\\)。則 \\(b = 23\\)。代入 \\(b+c=54\\)，\\(23+c=54\\)，得 \\(c = 31\\)。" 
+                        "hint": "關鍵在奇偶數討論！質數中只有 \\(2\\) 是偶數，其餘都是奇數。因為兩數相加 \\(a+b=25\\) 是奇數，代表 \\(a、b\\) 之中固定有一個偶數質數。偶數質數是誰呢？",
+                        "exp": "因為質數中除了 2 之外都是奇數，\\(a+b=25\\)(奇數)代表 a、b 中必有一個偶數。故偶數質數 \\(a = 2\\)，則 \\(b = 23\\)。代入 \\(b+c=54\\)，得 \\(c = 31\\)。" 
                     },
                     { 
-                        "q": "有 30 張分別標示 1～30 號的紙牌。先將號碼數為 3 的倍數的紙牌拿掉，然後從剩下的紙牌中，拿掉號碼數為 2 的倍數的紙牌。若將最後剩下的紙牌，依號碼數由小到大排列，則第 5 張紙牌的號碼為何？", 
-                        "opts": ["7", "11", "13", "17"], 
+                        "q": "若 \\(a、b\\) 為正整數，且 \\(a×b＝2^5×3^2×5\\)，則下列何者不可能為 \\(a、b\\) 的最大公因數？", 
+                        "opts": ["1", "6", "8", "12"], 
                         "ans": 2, 
-                        "source": "96 年第一次基測第 13 題",
-                        "hint": "將標號 1～30 中，扣除 2 的倍數與 3 的倍數。剩餘數（即與 6 互質的數）依序列出，數到第 5 個即可。",
-                        "exp": "拿掉 2 和 3 的倍數，剩下的紙牌號碼為 1、5、7、11、13、17……，由小到大第 5 張為 13。故選 C。" 
+                        "source": "110 年會考第 3 題",
+                        "hint": "利用公式 \\(a×b = (a, b)×[a, b]\\)。最大公因數 \\((a, b)\\) 的質因數次方數，必須小於或等於兩數乘積所分配下來的質因數次方數，且最小公倍數必須是最大公因數的倍數。",
+                        "exp": "設最大公因數為 8 = \\(2^3\\)。若最大公因數為 \\(2^3\\)，則 \\(a\\) 與 \\(b\\) 都必須能被 \\(2^3\\) 整除，此時其乘積 \\(a×b\\) 必須含有至少 \\(2^6\\)（即 \\(2^3 \times 2^3\\)）的因數，但題目中 \\(a×b\\) 的 2 的次方僅有 5 次（\\(2^5\\)），故最大公因數不可能是 8。選 C。" 
                     },
                     { 
-                        "q": "下列四個數，哪一個不是質數？", 
-                        "opts": ["41", "61", "71", "91"], 
-                        "ans": 3, 
-                        "source": "96 年第一次基測第 14 題",
-                        "hint": "質數定義為除 1 與本身外無其他因數。請檢查 91 是否可以被某個 10 以內的質數（如 7）整除？",
-                        "exp": "因為 \\(91 ＝ 7 × 13\\)（為合數），其餘三個選項皆為質數。故選 D。" 
-                    },
-                    { 
-                        "q": "已知春日麵包店的紅豆麵包、奶油麵包、巧克力麵包的單價分別為 15、25、35 元。某日麵包店打烊後分別計算各種麵包當日賣出的收入金額，若三種麵包的當日總收入金額均相等，則此金額可能在下列哪一個範圍？", 
+                        "q": "已知春日麵包店的紅豆麵包、奶油麵包、巧克力麵包的單價分別為 15、25、35 元。若三種麵包賣出的總收入均相等，則此金額可能在下列哪一個範圍？", 
                         "opts": ["1～250 元", "251～500 元", "501～750 元", "751～1000 元"], 
                         "ans": 2, 
                         "source": "111 年會考補考第 2 題",
-                        "hint": "收入相等代表此總金額必須是單價 15, 25, 35 的公倍數。請先利用短除法求出最小公倍數 \\([7-9]\\)。",
-                        "exp": "最小公倍數 \\([7-9] = 525\\) 元。收入金額必須是 525 的整數倍（如 525, 1050 ...）。對照選項只有 525 元落在 501~750 區間。故選 C。" 
+                        "hint": "三種麵包的當日總收入金額相等，表示該總金額必須同時是 15、25、35 的倍數，即為公倍數。利用短除法先求出其最小公倍數。",
+                        "exp": "找出 [2-4] 的最小公倍數：\\(5 \times 3 \times 5 \times 7 = 525\\) 元。收入金額必須是 525 的倍數，選項中只有 525 元落在 501~750 元。選 C。" 
                     },
                     { 
-                        "q": "下列選項中所表示的數，哪一個與 252 的最大公因數為 42？", 
-                        "opts": ["\\(2×3×5^2×7^2\\)", "\\(2×3^2×5×7\\)", "\\(2^2×3×5^2×7\\)", "\\(2^2×3^2×5^2×7^2\\)"], 
+                        "q": "下列四個數中所表示的數，哪一個與 252 的最大公因數為 42？", 
+                        "opts": ["\\(2×3×5^2×7^2\\)", "\\(2×3^2×5×7^2\\)", "\\(2^2×3×5^2×7\\)", "\\(2^2×3^2×5×7\\)"], 
                         "ans": 0, 
                         "source": "106 年會考第 5 題",
-                        "hint": "質因數分解：\\(252 = 2^2 × 3^2 × 7\\)，\\(42 = 2 × 3 × 7\\)。所選數字與 252 在質因數 2、3、7 上的最低次方必須恰為 1、1、1，且不包含其他 252 有但 42 沒有的因數（如額外的2或3）。",
-                        "exp": "最大公因數是 \\(2^1 × 3^1 × 7^1\\)。選項B有 \\(3^2\\)，其與 252 的公因數會有 \\(3^2\\) 排除；選項C、D同理含有過多的 2 與 3。只有 A 與 252 取得最大公因數為 \\(2×3×7=42\\)。故選 A。" 
+                        "hint": "質因數分解：\\(252 = 2^2 \times 3^2 \times 7\\)，而目標最大公因數 \\(42 = 2 \times 3 \times 7\\)。檢查各選項質因數，找出最低次方符合 \\(2^1 \times 3^1 \times 7^1\\) 的組合。",
+                        "exp": "對照 (A) \\(2 \times 3 \times 5^2 \times 7^2\\) 與 \\(2^2 \times 3^2 \times 7\\)，其共同質因數為 2 (最低1次方)、3 (最低1次方)、7 (最低1次方)，最大公因數為 \\(2 \times 3 \times 7 = 42\\)，符合題意。選 A。" 
                     }
                 ],
                 "nonMcq": [
                     {
-                        "q": "三條繩子，長度分別為 a 公分、b 公分與 252 公分。今將它們剪成等長的整數公分繩段，共得 30 段。若每段長度介於 20 到 40 公分之間，求 a＋b 的可能值為何？",
+                        "q": "三條繩子長度分別為 a 公分、b 公分與 252 公分。今將它們剪成等長的整數公分繩段，共得 30 段。若每段長度介於 20 到 40 公分之間，求 a+b 的可能值為何？",
                         "source": "會考非選模擬篇 CH2 第 1 題",
-                        "hint": "每段長度必須是 252 的正因數，且介於 20 與 40 之間。先找出 252 的合格因數（21, 28, 36 公分），再分三種情況討論 252 公分剪出的段數，從而得出 a 與 b 共需剪成幾段以累計至 30 段。",
-                        "exp": "252 介於 20～40 的因數有：21、28、36。<br>(1) 若每段長 21 公分：\\(252 ÷ 21 ＝ 12\\) 段。則 a 與 b 共需剪成 \\(30 － 12 ＝ 18\\) 段，\\(a＋b ＝ 21 × 18 ＝ 378\\) 公分。<br>(2) 若每段長 28 公分：\\(252 ÷ 28 ＝ 9\\) 段。則 a 與 b 共需剪成 \\(30 － 9 ＝ 21\\) 段，\\(a＋b ＝ 28 × 21 ＝ 588\\) 公分。<br>(3) 若每段長 36 公分：\\(252 ÷ 36 ＝ 7\\) 段。則 a 與 b 共需剪成 \\(30 － 7 ＝ 23\\) 段，\\(a＋b ＝ 36 × 23 ＝ 828\\) 公分。",
+                        "hint": "每段長度必為 252 的因數，且在 20～40 之間，合格因數有：21、28、36 公分。分三種情況討論 252 公分剪出的段數，剩餘段數即為 a、b 剪出的段數。",
+                        "exp": "每段長度必為 252 的因數，合格的有 21、28、36 公分。<br>(1) 若每段長 21 公分：\\(252 ÷ 21 = 12\\) 段，則 a、b 剪成 \\(30 - 12 = 18\\) 段，\\(a+b = 21 × 18 = 378\\)。<br>(2) 若每段長 28 公分：\\(252 ÷ 28 = 9\\) 段，則 a、b 剪成 \\(30 - 9 = 21\\) 段，\\(a+b = 28 × 21 = 588\\)。<br>(3) 若每段長 36 公分：\\(252 ÷ 36 = 7\\) 段，則 a、b 剪成 \\(30 - 7 = 23\\) 段，\\(a+b = 36 × 23 = 828\\)。",
                         "rubric": [
-                            "3 分：觀念完全正確，解題過程完整且求出三種可能之值（378、588、828）。",
-                            "2 分：能列出 252 的三個因數並完整討論出 2 種狀況，或算式正確但有計算筆誤。",
-                            "1 分：僅列出因數 21、28、36 或僅列出其中一種情況的算式與結果。",
-                            "0 分：空白或僅猜出數字而無合理推導。"
-                        ]
-                    },
-                    {
-                        "q": "甲、乙兩家水果店的蘋果售價均為 30 元，分別推出優惠促銷方案：甲店為買 7 個蘋果送 2 個蘋果；乙店為買 4 個蘋果送 1 個蘋果。豪哥在兩家店分別以優惠方案購買相同數量的蘋果，已知在甲店買比在乙店買便宜 150 元，求豪哥購買的數量？",
-                        "source": "會考非選模擬篇 CH2 第 2 題",
-                        "hint": "利用公倍數概念思考。甲店方案每 9 個為一輪（付7個錢）；乙店每 5 個為一輪（付4個錢）。設基準量為 \\([4, 10] = 45\\) 個，比較購買 45 個時兩店價差，再推算便宜 150 元時的總購買量。",
-                        "exp": "甲店：付 7 個錢可拿 9 個；乙店：付 4 個錢可拿 5 個。<br>以 45 個蘋果為討論基準（9 與 5 的公倍數）：<br>甲店需付：\\((45 ÷ 9) × 7 ＝ 35\\) 個的錢。 乙店需付：\\((45 ÷ 5) × 4 ＝ 36\\) 個的錢。<br>由此可知，每買 45 個蘋果，甲店比乙店便宜 1 個蘋果的錢，即 30 元。<br>已知豪哥共便宜 150 元，故購買數量為 \\((150 ÷ 30) × 45 ＝ 225\\) 個。",
-                        "rubric": [
-                            "3 分：觀念正確，利用最小公倍數分析出單一基準價差，且正確求出總數 225 個。",
-                            "2 分：能得出在兩店購買 45 個時甲比乙少付 30 元，但未能成功延伸至 150 元價差計算。",
-                            "1 分：能列出兩店促銷方案下的單價或價量比例關係，但未能做後續組合分析。",
-                            "0 分：解題空白或算式無意義。"
+                            "3 分：觀念正確，找出因數 21、28、36 並完整列出 3 種對應的 a+b 值。",
+                            "2 分：解題過程完整但計算錯誤，或僅能找出 2 種狀況並算對其值。",
+                            "1 分：僅知道每段長為 252 介於 20~40 的因數，或僅完整列出 1 種狀況。",
+                            "0 分：空白或與題目無關。"
                         ]
                     }
                 ]
@@ -321,81 +291,61 @@
                 "title": "CH3 一元一次方程式與應用問題",
                 "mcq": [
                     { 
-                        "q": "某日服飾店舉辦大拍賣，外套依原價打六折出售，襯衫和褲子依原價打八折出售。已知外套原價 250 元，襯衫原價 125 元，褲子原價 125 元。服飾共賣出 200 件，共得 24000 元。若外套賣出 x 件，則依題意可列出下列哪一個一元一次方程式？", 
+                        "q": "某日服飾店大拍賣，外套打六折出售，襯衫和褲子打八折出售。已知外套原價 250 元，襯衫原價 125 元，褲子原價 125 元。服飾共賣出 200 件，共得 24000 元。若外套賣出 \\(x\\) 件，則依題意可列出下列哪一個一元一次方程式？", 
                         "opts": ["\\(0.6×250x＋0.8×125(200＋x)＝24000\\)", "\\(0.6×250x＋0.8×125(200－x)＝24000\\)", "\\(0.8×125x＋0.6×250(200＋x)＝24000\\)", "\\(0.8×125x＋0.6×250(200－x)＝24000\\)"], 
                         "ans": 1, 
                         "source": "102 年基測第 1 題",
-                        "hint": "外套原價 250 元打六折，單價為 \\(250 × 0.6\\)。襯衫和褲子原價都是 125 元打八折，單價同為 \\(125 × 0.8\\)。若外套賣出 \\(x\\) 件，其餘服飾共賣出 \\(200 - x\\) 件。",
-                        "exp": "外套賣出 x 件，單價為 \\(250 × 0.6\\)；其餘兩種服飾原價與折數相同，共賣出 \\((200－x)\\) 件，單價為 \\(125 × 0.8\\)。故總金額方程式為 \\(0.6×250x＋0.8×125(200－x)＝24000\\)。選 B。" 
+                        "hint": "外套單價打六折為 \\(250 × 0.6\\)。襯衫和褲子原價相同、折數相同，故可以合併計算單價為 \\(125 × 0.8\\)。其數量為 \\((200-x)\\) 件。",
+                        "exp": "外套賣出 x 件，金額為 \\(0.6 \times 250x\\) 元；其餘襯衫與褲子共賣出 \\((200-x)\\) 件，金額為 \\(0.8 \times 125 \times (200-x)\\) 元。兩者總和為 24000 元。選 B。" 
                     },
                     { 
                         "q": "解方程式 \\(x－2÷\\frac{5}{6}＝\\frac{1}{30}\\)，得 \\(x＝？\\)", 
                         "opts": ["\\(\\frac{51}{25}\\)", "\\(\\frac{73}{30}\\)", "\\(\\frac{73}{36}\\)", "\\(\\frac{60}{27}\\)"], 
                         "ans": 1, 
                         "source": "98 年第二次基測第 2 題",
-                        "hint": "遵守「先乘除後加減」！先將除以 \\(\\frac{5}{6}\\) 化為乘以倒數 \\(\\frac{6}{5}\\)，計算出減項之值，再移項通分求解。",
-                        "exp": "原式化簡：\\(x － 2 × \\frac{6}{5} ＝ \\frac{1}{30}\\) ⇒ \\(x － \\frac{12}{5} ＝ \\frac{1}{30}\\) ⇒ \\(x ＝ \\frac{1}{30} ＋ \\frac{72}{30} ＝ \\frac{73}{30}\\)。選 B。" 
+                        "hint": "先算除法：\\(2÷\\frac{5}{6} = 2 \times \\frac{6}{5} = \\frac{12}{5}\\)。再利用等量公理或移項法則，通分計算求出 \\(x\\)。",
+                        "exp": "原式化簡：\\(x － \\frac{12}{5} ＝ \\frac{1}{30}\\) ⇒ \\(x ＝ \\frac{1}{30} ＋ \\frac{72}{30} ＝ \\frac{73}{30}\\)。選 B。" 
                     },
                     { 
                         "q": "下列何者為一元一次方程式 \\(2x－\\frac{9－x}{3}＝11\\) 的解？", 
                         "opts": ["\\(x＝6\\)", "\\(x＝14\\)", "\\(x＝\\frac{20}{7}\\)", "\\(x＝\\frac{42}{5}\\)"], 
                         "ans": 0, 
                         "source": "96 年第二次基測第 4 題",
-                        "hint": "利用等量公理將兩邊同乘以 3 以消去分母。要注意的是，分子中的 \\((9-x)\\) 在去分母且前面有負號時，要將括號拆開變號！",
-                        "exp": "兩邊同乘以 3 得：\\(6x － (9 － x) ＝ 33\\) ⇒ \\(6x － 9 ＋ x ＝ 33\\) ⇒ \\(7x ＝ 42\\) ⇒ \\(x ＝ 6\\)。選 A。" 
+                        "hint": "方程式兩邊同乘以 3 去分母，注意分子 \\((9-x)\\) 前方為減號時，展開分子要特別注意變號（負負得正）！",
+                        "exp": "兩邊同乘以 3：\\(6x － (9 － x) ＝ 33\\) ⇒ \\(6x － 9 ＋ x ＝ 33\\) ⇒ \\(7x ＝ 42\\) ⇒ \\(x ＝ 6\\)。選 A。" 
                     },
                     { 
-                        "q": "已知麵包店的麵包一個 15 元。小明去買麵包，結帳時店員告訴小明：「如果你再多買一個麵包就可以打九折，價錢會比現在便宜 45 元」。根據兩人的對話，判斷結帳時小明原本買了多少個麵包？", 
+                        "q": "已知麵包店的麵包一個 15 元。結帳時店員告訴小明：「如果你再多買一個麵包就可以打九折，價錢會比現在便宜 45 元」。根據對話，小明原本想買多少個麵包？", 
                         "opts": ["38", "39", "40", "41"], 
                         "ans": 1, 
                         "source": "103 年特招第 10 題",
-                        "hint": "設小明原本預計買 \\(x\\) 個麵包。原本總價為 \\(15x\\) 元；多買一個（共 \\(x+1\\) 個）打九折的價格為 \\(15(x+1) × 0.9\\)。依「後者比前者便宜 45 元」列出一元一次方程式。",
-                        "exp": "設買 x 個。依題意列式：\\(15x － 15(x＋1)×0.9 ＝ 45\\) ⇒ \\(15x － 13.5x － 13.5 ＝ 45\\) ⇒ \\(1.5x ＝ 58.5\\) ⇒ \\(x ＝ 39\\) 個。選 B。" 
-                    },
-                    { 
-                        "q": "小芬買 15 份禮物，共花了 900 元。已知每份禮物內都有 1 包餅乾及每支售價 20 元的棒棒糖 2 支。若每包餅乾的售價為 x 元，則依題意可列出下列哪一個一元一次方程式？", 
-                        "opts": ["\\(15(2x＋20)＝900\\)", "\\(15x＋20×2＝900\\)", "\\(15(x＋20×2)＝900\\)", "\\(15×x×2＋20＝900\\)"], 
-                        "ans": 2, 
-                        "source": "99 年第一次基測第 13 題",
-                        "hint": "先算出一份禮物的成本：1 包餅乾 \\(x\\) 元加上 2 支 20 元棒棒糖（即 \\(20×2\\) 元）。再將單份成本乘以 15 份，使其等於 900 元。",
-                        "exp": "一份禮物內有 1 包餅乾 \\(x\\) 元和 2 支 20 元的棒棒糖共 \\(20×2\\) 元，即單份價值為 \\((x ＋ 20×2)\\)。15 份總和為 900 元，列式為 \\(15(x ＋ 20×2) ＝ 900\\)。選 C。" 
+                        "hint": "設原本買 x 個。原本需付 \\(15x\\) 元；多買一個 (x+1 個) 打九折需付 \\(15(x+1) \times 0.9\\) 元。後者比前者少 45 元。",
+                        "exp": "設原欲買 x 個，依題意列式：\\(15x － 15(x＋1)×0.9 ＝ 45\\) ⇒ \\(1.5x － 13.5 ＝ 45\\) ⇒ \\(1.5x ＝ 58.5\\) ⇒ \\(x ＝ 39\\)（個）。選 B。" 
                     }
                 ],
                 "nonMcq": [
                     {
                         "q": "如圖，有大、小兩個長方形，其重疊部分的面積占大長方形面積的 \\(\\frac{1}{8}\\)，且占小長方形面積的 \\(\\frac{3}{5}\\)，未重疊部分（扣除鋪色面積）的總面積為 115，試求小長方形的面積為多少？",
                         "source": "會考非選模擬篇 CH3 第 1 題",
-                        "hint": "設小長方形面積為 x。則重疊鋪色面積為 \\(\\frac{3}{5}x\\)。因為該重疊部分占大長方形的 \\(\\frac{1}{8}\\)，可知大長方形面積為 \\(\\frac{3}{5}x × 8 = \\frac{24}{5}x\\)。未重疊部分 ＝ (大長方形 - 重疊) + (小長方形 - 重疊)，試將其列出等式求解。",
-                        "exp": "設小長方形面積為 x，則大長方形面積為 \\(\\frac{24}{5}x\\)。<br>未重疊部分總面積 ＝ \\(\\frac{24}{5}x × (1 - \\frac{1}{8}) ＋ x × (1 - \\frac{3}{5}) ＝ 115\\)<br>\\(\\frac{24}{5}x × \\frac{7}{8} ＋ \\frac{2}{5}x ＝ 115\\) ⇒ \\(\\frac{21}{5}x ＋ \\frac{2}{5}x ＝ 115\\) ⇒ \\(\\frac{23}{5}x ＝ 115\\) ⇒ \\(x ＝ 25\\)。<br>答：小長方形面積為 25。",
+                        "hint": "設小長方形面積為 x。則重疊部分面積可記為 \\(\\frac{3}{5}x\\)。進而求出大長方形面積。將大、小長方形各自扣除重疊面積加總等於 115 列式求解。",
+                        "exp": "設小長方形為 x，重疊為 \\(\\frac{3}{5}x\\)。大長方形為 \\(\\frac{3}{5}x \times 8 = \\frac{24}{5}x\\)。<br>未重疊面積之和：\\(\\frac{24}{5}x \times \\frac{7}{8} + x \times \\frac{2}{5} = 115\\) ⇒ \\(\\frac{21}{5}x + \\frac{2}{5}x = 115\\) ⇒ \\(\\frac{23}{5}x = 115\\) ⇒ \\(x = 25\\)。",
                         "rubric": [
                             "3 分：解題策略適切，列式與求解過程合理完整，答案 25 正確無誤。",
                             "2 分：能正確列出一元一次方程式，但在去分母或移項化簡時出現計算錯誤。",
-                            "1 分：未能列出正確方程式，但能藉由重疊比例正確表達大、小長方形面積的倍數關係。",
+                            "1 分：未能列出正確方程式，但能藉由重疊比例正確表達大、小長方形面積的關係。",
                             "0 分：空白或僅寫答案無算式。"
                         ]
                     },
                     {
-                        "q": "王老師將班上的學生等分成甲、乙、丙三組，後來又將甲組人數的 \\(\\frac{1}{4}\\) 移到乙組，並將乙組中的 4 人移到丙組，最後丙組的總人數比乙組的 2 倍少 6 人。若全班共有 x 位學生，請依題意列出正確的方程式，並求出 x 之值。",
+                        "q": "王老師將班上的學生等分成甲、乙、丙三組，後來又將甲組人數的 \\(\\frac{1}{4}\\) 移到乙組，並將乙組中的 4 人移到丙組，最後丙組的總人數比乙組的 2 倍少 6 人。若全班共有 x 位學生，請列出方程式，並求出 x 之值。",
                         "source": "會考非選模擬篇 CH3 第 3 題",
-                        "hint": "最初每組人數皆為 \\(\\frac{x}{3}\\) 人。依照移動邏輯寫出變動後各組的人數代數式：甲組剩下原本的四分之三；乙組得到甲移入的人再減去 4 人；丙組得到 4 人。最後利用「丙人數 ＝ 2 × 乙人數 － 6」列出方程式。",
-                        "exp": "原來三組人數均為 \\(\\frac{x}{3}\\) 人。<br>變動後：<br>甲組剩下：\\(\\frac{x}{3} × (1 - \\frac{1}{4}) = \\frac{x}{4}\\) 人。<br>乙組變為：\\(\\frac{x}{3} ＋ \\frac{x}{12} － 4 = \\frac{5}{12}x － 4\\) 人。<br>丙組變為：\\(\\frac{x}{3} ＋ 4\\) 人。<br>依題意列式：\\(\\frac{x}{3} ＋ 4 ＝ 2(\frac{5}{12}x － 4) － 6\\)<br>展開：\\(\\frac{x}{3} ＋ 4 ＝ \\frac{5}{6}x － 8 － 6\\)<br>同乘以 12：\\(4x ＋ 48 ＝ 10x － 168\\) ⇒ \\(6x ＝ 216\\) ⇒ \\(x ＝ 36\\)。<br>答：全班人數為 36 人。",
+                        "hint": "一開始每組有 \\(\\frac{x}{3}\\) 人。一步步寫出變動後各組的人數表示式，再依據最後乙、丙組的數量關係列出方程式。",
+                        "exp": "原每組 \\(\\frac{x}{3}\\) 人。變動後：<br>甲組：\\(\\frac{x}{3} \times \\frac{3}{4} = \frac{x}{4}\\) 人。<br>乙組：\\(\\frac{x}{3} + \\frac{x}{12} - 4 = \\frac{5}{12}x - 4\\) 人。<br>丙組：\\(\\frac{x}{3} + 4\\) 人。<br>依題意：\\(\\frac{x}{3} + 4 = 2(\\frac{5}{12}x - 4) - 6\\) ⇒ \\(\\frac{x}{3} + 4 = \\frac{5}{6}x - 14\\) ⇒ \\(6x = 216\\) ⇒ \\(x = 36\\) 人。",
                         "rubric": [
                             "3 分：方程式列式正確、求解步驟完整且答案 36 正確。",
                             "2 分：能依題意列出正確的方程式，但求解過程中出現計算筆誤。",
                             "1 分：未注意到全班為 x 人的假設，或能列出各組的人數代數式但方程式錯誤。",
                             "0 分：空白或與題目完全無關。"
-                        ]
-                    },
-                    {
-                        "q": "阿羅買了藍、綠兩捆棉線，已知藍、綠兩捆棉線的總長度分別為 12 公尺和 15 公尺，並將這兩捆棉線依固定長度分段，分段後沒有剩下，且綠色比藍色多出 5 段，則綠色棉線共分成多少段？請說明你的理由。",
-                        "source": "會考非選模擬篇 CH3 第 4 題",
-                        "hint": "【解法一】設藍色剪成 \\(x\\) 段，則綠色剪成 \\(x + 5\\) 段。因為每段長度固定且相同，其長度可表示為：\\(\\frac{12}{x} = \\frac{15}{x+5}\\)。交叉相乘求出 \\(x\\) 後，再計算綠色段數！<br>【解法二】綠色比藍色長度多 3 公尺，且分出的段數多 5 段，代表這多出的 5 段長度正好是 3 公尺，所以每段長度為 \\(3 ÷ 5 = 0.6\\) 公尺。再用 15 公尺求出綠色段數。",
-                        "exp": "【解法一】設藍色分成 x 段，則綠色分成 \\((x+5)\\) 段。<br>依每段等長列式：\\(\\frac{12}{x} ＝ \\frac{15}{x＋5}\\) ⇒ \\(12(x＋5) ＝ 15x\\) ⇒ \\(12x ＋ 60 ＝ 15x\\) ⇒ \\(3x ＝ 60\\) ⇒ \\(x ＝ 20\\)。<br>綠色段數為 \\(20 ＋ 5 ＝ 25\\) 段。<br>【解法二】段長為 \\((15 － 12) ÷ 5 ＝ 0.6\\) 公尺。綠色棉線分成 \\(15 ÷ 0.6 ＝ 25\\) 段。<br>答：綠色共分成 25 段。",
-                        "rubric": [
-                            "3 分：策略適切，解題步驟清晰合理，答案 25 正確無誤。",
-                            "2 分：列式與計算均正確，但僅算出藍色為 20 段而漏加 5 段回答綠色，或計算程序有小筆誤。",
-                            "1 分：能依題意設未知數並成功列出分式方程式，但無法求解。",
-                            "0 分：空白或答案無推導理由。"
                         ]
                     }
                 ]
@@ -406,7 +356,7 @@
         let currentChapter = "";
         let currentQuestions = [];
         let currentQuestionIndex = 0;
-        let userMcqAnswers = []; // 儲存選擇題的回答狀況 (true/false)
+        let userMcqAnswers = []; // 儲存選擇題的答題細節對象
         let userNonMcqAnswers = []; // 儲存非選題學生的文字回答
 
         // 初始化：渲染章節選擇
@@ -426,7 +376,7 @@
                 btn.innerHTML = `
                     <div class="mb-4">
                         <h3 class="font-bold text-slate-800 text-lg group-hover:text-blue-600 transition-colors">${ch.title}</h3>
-                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">包含歷屆基測試題、會考模擬試題與神助攻挑戰卷。</p>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">內含歷屆基測、會考與非選模擬精選，提供解題思路提示與錯題概念重建。</p>
                     </div>
                     <div class="w-full flex justify-between items-center pt-3 border-t border-slate-100">
                         <span class="text-xs font-semibold text-slate-500">題庫：${ch.mcq.length} 選擇 / ${ch.nonMcq.length} 非選</span>
@@ -443,12 +393,11 @@
             return shuffled.slice(0, n);
         }
 
-        // 開始測驗：組裝試卷 (至多 15選擇 + 5非選)
+        // 開始測驗：組裝試卷 (隨機抽取 15選擇 + 5非選，若題庫不夠則全抽)
         function startQuiz(chapterKey) {
             currentChapter = chapterKey;
             const chData = quizDatabase[chapterKey];
             
-            // 隨機抽出至多15題選擇、5題非選
             const selectedMcq = getRandomSubset(chData.mcq, 15).map(q => ({ ...q, type: 'mcq' }));
             const selectedNonMcq = getRandomSubset(chData.nonMcq, 5).map(q => ({ ...q, type: 'nonMcq' }));
             
@@ -490,7 +439,7 @@
 
             // 顯示試題來源
             const sourceDiv = document.getElementById('question-source');
-            sourceDiv.textContent = `試題來源：${q.source || "會考模擬篇庫"}`;
+            sourceDiv.textContent = `試題來源：${q.source || "116會考非選特訓模擬庫"}`;
 
             // 填入題目內容
             const contentDiv = document.getElementById('question-content');
@@ -586,13 +535,22 @@
             
             if (q.type === 'mcq') {
                 const isCorrect = (selectedOptionIndex === q.ans);
-                userMcqAnswers.push(isCorrect);
+                // 儲存詳細錯題分析物件
+                userMcqAnswers.push({
+                    q: q.q,
+                    opts: q.opts,
+                    userAns: selectedOptionIndex,
+                    correctAns: q.ans,
+                    isCorrect: isCorrect,
+                    exp: q.exp,
+                    source: q.source
+                });
             } else {
                 const inputVal = document.getElementById('non-mcq-input').value.trim();
                 userNonMcqAnswers.push({
                     q: q.q,
                     source: q.source,
-                    userAnswer: inputVal || "（未書寫過程，直接看答案）",
+                    userAnswer: inputVal || "（未書寫過程，直接看解答對照）",
                     exp: q.exp,
                     rubric: q.rubric
                 });
@@ -607,78 +565,132 @@
             }
         }
 
-        // 顯示成績與非選題自評對照
+        // 顯示成績、選擇題錯題分析與非選題自評對照
         function showResult() {
             document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
 
             // 1. 計算選擇題得分
-            const correctCount = userMcqAnswers.filter(x => x === true).length;
+            const correctCount = userMcqAnswers.filter(x => x.isCorrect === true).length;
             const totalMcq = userMcqAnswers.length;
             const scorePercentage = totalMcq > 0 ? Math.round((correctCount / totalMcq) * 100) : 0;
             document.getElementById('score-text').textContent = `${scorePercentage}% (共答對 ${correctCount}/${totalMcq} 題)`;
 
-            // 2. 渲染非選題對照自評
+            // 2. 渲染【❌ 選擇題錯題分析】區塊
+            const wrongAnalysisCard = document.getElementById('wrong-analysis-card');
+            const wrongContainer = document.getElementById('wrong-analysis-container');
+            wrongContainer.innerHTML = "";
+
+            if (totalMcq > 0) {
+                wrongAnalysisCard.classList.remove('hidden');
+                const wrongQuestions = userMcqAnswers.filter(x => !x.isCorrect);
+                
+                if (wrongQuestions.length === 0) {
+                    wrongContainer.innerHTML = `
+                        <div class="text-center py-8 px-4 text-emerald-700 font-semibold bg-emerald-50 rounded-2xl border border-emerald-100 flex flex-col items-center justify-center gap-2">
+                            <span class="text-3xl">🎉</span>
+                            <div>太強了！您在此章節的所有選擇題中拿到滿分，沒有任何錯題！</div>
+                            <span class="text-xs font-normal text-slate-400 leading-relaxed">100% 答對率，概念無懈可擊，繼續保持！</span>
+                        </div>
+                    `;
+                } else {
+                    wrongQuestions.forEach((item, index) => {
+                        const card = document.createElement('div');
+                        card.className = "p-5 border border-red-100 bg-red-50/10 rounded-2xl space-y-3";
+                        card.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <span class="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-md">第 ${index + 1} 題 錯題檢修</span>
+                                <span class="text-xs text-slate-400">來源：${item.source}</span>
+                            </div>
+                            <div class="text-sm font-medium text-slate-800 leading-relaxed">${item.q}</div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
+                                <div class="p-3 rounded-xl bg-red-50 border border-red-100/50 text-red-800 flex items-start gap-1.5">
+                                    <span class="text-base leading-none">❌</span>
+                                    <div>
+                                        <strong>您的答案：</strong>(${String.fromCharCode(65 + item.userAns)}) ${item.opts[item.userAns]}
+                                    </div>
+                                </div>
+                                <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100/50 text-emerald-800 flex items-start gap-1.5">
+                                    <span class="text-base leading-none">✅</span>
+                                    <div>
+                                        <strong>正確答案：</strong>(${String.fromCharCode(65 + item.correctAns)}) ${item.opts[item.correctAns]}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-700 leading-relaxed">
+                                <strong class="text-slate-900 block mb-1">💡 錯題觀念解析：</strong>
+                                ${item.exp}
+                            </div>
+                        `;
+                        wrongContainer.appendChild(card);
+                    });
+                }
+            } else {
+                wrongAnalysisCard.classList.add('hidden');
+            }
+
+            // 3. 渲染【📝 非選擇題自評】區塊
+            const nonMcqCard = document.getElementById('non-mcq-card');
             const container = document.getElementById('self-eval-container');
             container.innerHTML = "";
 
-            if (userNonMcqAnswers.length === 0) {
-                container.innerHTML = `<p class="text-slate-400 text-sm">本次測驗不包含非選擇題。</p>`;
-                return;
-            }
-
-            userNonMcqAnswers.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = "pt-6 first:pt-0 space-y-4";
-                
-                let rubricHtml = "";
-                if (item.rubric) {
-                    item.rubric.forEach(step => {
-                        rubricHtml += `<li class="text-xs text-slate-600 list-disc ml-4 mt-1">${step}</li>`;
-                    });
-                } else {
-                    rubricHtml = `<li class="text-xs text-slate-400 list-none italic">未設定評分指引，請直接參考詳解。</li>`;
-                }
-
-                card.innerHTML = `
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="inline-block bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded">非選第 ${index + 1} 題</span>
-                            <span class="text-xs text-slate-400">來源：${item.source}</span>
-                        </div>
-                        <div class="text-sm font-medium text-slate-800 leading-relaxed">${item.q}</div>
-                    </div>
+            if (userNonMcqAnswers.length > 0) {
+                nonMcqCard.classList.remove('hidden');
+                userNonMcqAnswers.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = "pt-6 first:pt-0 space-y-4";
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="border border-amber-100 bg-amber-50/20 p-4 rounded-xl">
-                            <span class="text-xs font-bold text-amber-700">✍️ 您的解題紀錄：</span>
-                            <pre class="text-xs text-slate-700 mt-2 whitespace-pre-wrap font-sans bg-white p-3 rounded border border-amber-100/50">${item.userAnswer}</pre>
-                        </div>
-                        <div class="border border-emerald-100 bg-emerald-50/20 p-4 rounded-xl font-sans">
-                            <span class="text-xs font-bold text-emerald-700">💡 官方參考詳解與思維：</span>
-                            <div class="text-xs text-slate-700 mt-2 bg-white p-3 rounded border border-emerald-100/50 leading-relaxed">${item.exp}</div>
-                        </div>
-                    </div>
+                    let rubricHtml = "";
+                    if (item.rubric) {
+                        item.rubric.forEach(step => {
+                            rubricHtml += `<li class="text-xs text-slate-600 list-disc ml-4 mt-1">${step}</li>`;
+                        });
+                    } else {
+                        rubricHtml = `<li class="text-xs text-slate-400 list-none italic">本題未設定三點指標，請直接參考解析。</li>`;
+                    }
 
-                    <div class="border border-slate-200 p-4 rounded-xl bg-slate-100/30">
-                        <span class="text-xs font-bold text-slate-500 flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-                            會考非選評分標準對照
-                        </span>
-                        <ul class="mt-2 space-y-1">
-                            ${rubricHtml}
-                        </ul>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+                    card.innerHTML = `
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="inline-block bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded">非選第 ${index + 1} 題</span>
+                                <span class="text-xs text-slate-400">來源：${item.source}</span>
+                            </div>
+                            <div class="text-sm font-medium text-slate-800 leading-relaxed">${item.q}</div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="border border-amber-100 bg-amber-50/20 p-4 rounded-xl">
+                                <span class="text-xs font-bold text-amber-700">✍️ 您的解題紀錄：</span>
+                                <pre class="text-xs text-slate-700 mt-2 whitespace-pre-wrap font-sans bg-white p-3 rounded border border-amber-100/50">${item.userAnswer}</pre>
+                            </div>
+                            <div class="border border-emerald-100 bg-emerald-50/20 p-4 rounded-xl font-sans">
+                                <span class="text-xs font-bold text-emerald-700">💡 官方參考詳解與思維：</span>
+                                <div class="text-xs text-slate-700 mt-2 bg-white p-3 rounded border border-emerald-100/50 leading-relaxed">${item.exp}</div>
+                            </div>
+                        </div>
+
+                        <div class="border border-slate-200 p-4 rounded-xl bg-slate-100/30">
+                            <span class="text-xs font-bold text-slate-500 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                                會考非選評分標準對照（三點評分指引）
+                            </span>
+                            <ul class="mt-2 space-y-1">
+                                ${rubricHtml}
+                            </ul>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                nonMcqCard.classList.add('hidden');
+            }
 
             if (window.MathJax) {
                 MathJax.typesetPromise();
             }
         }
 
-        // 防呆提示
+        // 防呆離開提示
         function confirmExit() {
             if(confirm("確定要放棄本次測驗並返回首頁嗎？目前的答題進度將不會被儲存。")) {
                 initQuizSetup();
