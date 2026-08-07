@@ -317,7 +317,7 @@
             }
         }
 
-        // 解析上傳的 Excel 檔案
+        // 解析上傳的 Excel 檔案（全新智慧型多工作表掃描與合併引擎）
         function handleExcelUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -328,15 +328,26 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
                     
-                    // 讀取第一個工作表
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
+                    let jsonData = [];
+                    let successSheets = [];
                     
-                    // 轉成 JSON
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    // 遍歷 Excel 中的所有分頁，只讀取含有題庫主要欄位（章節代號與題目）的分頁
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const tempJson = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        if (tempJson.length > 0) {
+                            // 檢查此工作表是否含有必要的題庫欄位
+                            const sampleRow = tempJson[0];
+                            if (sampleRow["章節代號"] !== undefined && sampleRow["題目"] !== undefined) {
+                                jsonData.push(...tempJson);
+                                successSheets.push(sheetName);
+                            }
+                        }
+                    });
                     
                     if (jsonData.length === 0) {
-                        alert("Excel 檔案中沒有找到資料，請檢查工作表與欄位格式。");
+                        alert("匯入失敗：\n\n網頁在 Excel 檔案中沒有搜尋到合法的題庫欄位。\n請確認您的工作表中包含「章節代號」、「章節名稱」、「題型」與「題目」等必要欄位！");
                         return;
                     }
                     
@@ -423,7 +434,7 @@
                     
                     // 更新介面狀態
                     document.getElementById('excel-status').innerHTML = `
-                        <span class="text-emerald-600 font-bold">✓ 匯入成功！共載入 ${finalChapters.length} 個自訂單元，共計 ${successCount} 道試題。</span>
+                        <span class="text-emerald-600 font-bold">✓ 匯入成功！系統自工作表 [${successSheets.join(", ")}] 內成功載入 ${finalChapters.length} 個自訂單元，共計 ${successCount} 道試題。</span>
                     `;
                     
                     // 重新渲染主頁面
