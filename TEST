@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>116 國中會考模擬與跨學科隨機特訓檢測系統</title>
+    <!-- 引入 Tailwind CSS 打造現代化美觀介面 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 MathJax 讓數學公式、根號、指數、分數完美呈現 -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- 引入 SheetJS 實現在網頁端直接解析 Excel (.xlsx) 檔案 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <!-- 頂部導覽列 -->
+    <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-md py-6 px-4">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold">116 國中會考隨機特訓檢測系統</h1>
+                <p class="text-blue-100 text-sm mt-1">支援跨學科、多冊數 • Excel 題庫隨載即測系統</p>
+            </div>
+            <span class="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold">116 萬用 Excel 匯入版</span>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto my-8 px-4">
+        
+        <!-- 步驟一：選擇章節與 Excel 匯入畫面 -->
+        <div id="setup-screen" class="space-y-6">
+            
+            <!-- Excel 匯入控制面板 -->
+            <div class="bg-white rounded-2xl shadow-sm p-8 border border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                    <span>📁 跨學科題庫載入面板</span>
+                    <span class="text-xs font-normal text-slate-400">（您可以直接匯入自訂的 Excel 試題檔）</span>
+                </h2>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                    您可以將本網頁與 Excel 題庫範本（含章節名稱、題型、題目、選項等欄位）配合使用。
+                    一鍵匯入後，本系統將會自動辨識章節與學科，並產生全新的特訓按鈕！
+                </p>
+                
+                <div class="flex flex-col md:flex-row gap-4 items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <div class="text-left">
+                        <div id="excel-status" class="text-sm font-semibold text-slate-600">
+                            📢 當前狀態：載入預設七年級數學 (1~3章) 題庫中
+                        </div>
+                        <div class="text-xs text-slate-400 mt-1">（您可以隨時匯入其他冊數、或是理化、英文、歷史等其他科目的 Excel 試題）</div>
+                    </div>
+                    <div>
+                        <input type="file" id="excel-file" accept=".xlsx, .xls" class="hidden" onchange="handleExcelUpload(event)">
+                        <label for="excel-file" class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl inline-block transition-all shadow-md hover:shadow-lg text-sm text-center">
+                            🚀 匯入自訂 Excel 題庫
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 章節選擇清單 -->
+            <div class="bg-white rounded-2xl shadow-sm p-8 border border-slate-100">
+                <h2 class="text-xl font-bold mb-6 text-slate-700 border-b pb-3">請選擇欲挑戰的測驗章節/學科</h2>
+                <div id="chapter-list" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- 由 JS 動態生成按鈕 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 步驟二：測驗進行畫面 -->
+        <div id="quiz-screen" class="hidden">
+            <!-- 進度條 -->
+            <div class="bg-white rounded-full h-2 w-full mb-4 overflow-hidden shadow-inner">
+                <div id="progress-bar" class="bg-blue-600 h-full w-0 transition-all duration-300"></div>
+            </div>
+            
+            <div class="flex justify-between items-center mb-6">
+                <span id="question-index" class="text-sm font-semibold text-slate-500">題目載入中...</span>
+                <button onclick="confirmExit()" class="text-xs text-red-500 hover:underline">結束本次測驗</button>
+            </div>
+
+            <!-- 題目卡片 -->
+            <div class="bg-white rounded-2xl shadow-sm p-8 border border-slate-100 min-h-[300px] flex flex-col justify-between">
+                <div class="space-y-4">
+                    <!-- 試題來源標籤 -->
+                    <div id="question-source" class="inline-block bg-blue-50 text-blue-700 border border-blue-100 text-xs font-semibold px-2.5 py-1 rounded-md"></div>
+                    
+                    <!-- 題目文字 -->
+                    <div id="question-content" class="mb-4"></div>
+                </div>
+
+                <!-- 💡 提示顯示區域 -->
+                <div id="hint-area" class="hidden my-4 transition-all duration-200">
+                    <!-- 提示文字動態生成 -->
+                </div>
+
+                <!-- 答題區：選擇題 -->
+                <div id="mcq-options" class="space-y-3 hidden my-4">
+                    <!-- 4個選項按鈕 -->
+                </div>
+
+                <!-- 答題區：非選擇題 -->
+                <div id="non-mcq-area" class="space-y-4 hidden my-4">
+                    <label class="block text-sm font-medium text-slate-600">請在下方書寫您的解題過程與最終答案（供測驗後對照自評）：</label>
+                    <textarea id="non-mcq-input" rows="6" class="w-full border border-slate-200 rounded-xl p-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-sans" placeholder="例：設原本甲、乙、丙三組各有 x/3 人..."></textarea>
+                </div>
+
+                <!-- 下方動作按鈕列 -->
+                <div class="mt-8 pt-4 border-t border-slate-100 flex justify-between items-center">
+                    <!-- 提示按鈕 -->
+                    <button id="hint-btn" onclick="toggleHint()" class="hidden text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 font-semibold px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm">
+                        <span>💡</span> 顯示解題提示
+                    </button>
+                    <!-- 佔位符 -->
+                    <span id="hint-placeholder" class="block w-1"></span>
+                    
+                    <!-- 下一步按鈕 -->
+                    <button id="next-btn" onclick="handleNext()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-all shadow-sm">
+                        下一題
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步驟三：結算與非選自評畫面 -->
+        <div id="result-screen" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm p-8 border border-slate-100 text-center">
+                <div class="inline-flex p-4 bg-emerald-50 rounded-full text-emerald-600 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">測驗挑戰完成！</h2>
+                <p class="text-slate-500 mt-2">選擇題答對率：<span id="score-text" class="text-blue-600 font-bold text-xl">0%</span></p>
+                <p class="text-slate-400 text-xs mt-1">（請參考下方「錯題分析」與「非選擇題自評」重修不熟的觀念喔！）</p>
+                <button onclick="initQuizSetup()" class="mt-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-6 py-2 rounded-xl transition-all">返回首頁選擇章節</button>
+            </div>
+
+            <!-- ❌ 選擇題錯題分析區 -->
+            <div id="wrong-analysis-card" class="bg-white rounded-2xl shadow-sm p-8 border border-slate-100 space-y-6 hidden">
+                <h3 class="text-lg font-bold text-slate-800 border-b pb-3 flex items-center gap-2">
+                    <span class="text-red-600">❌ 選擇題錯題分析與觀念重建</span>
+                    <span class="text-xs font-normal text-slate-400">（特別針對答錯的題目進行解析與複習）</span>
+                </h3>
+                <div id="wrong-analysis-container" class="space-y-6">
+                    <!-- 錯題分析對照動態生成 -->
+                </div>
+            </div>
+
+            <!-- 📝 非選擇題自評區 -->
+            <div id="non-mcq-card" class="bg-white rounded-2xl shadow-sm p-8 border border-slate-100 space-y-8 hidden">
+                <h3 class="text-lg font-bold text-slate-800 border-b pb-3 flex items-center gap-2">
+                    <span>📝 非選擇題「算式對照」與自評</span>
+                    <span class="text-xs font-normal text-slate-400">（請根據會考閱卷規範檢視自己的邏輯喔！）</span>
+                </h3>
+                <div id="self-eval-container" class="space-y-8 divide-y divide-slate-100">
+                    <!-- 非選答案對照動態生成 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /************************************************************
+         * 【116 國中數學預設題庫】
+         * - 預載第一至三章大容量題庫。
+         * - 若使用者匯入 Excel，此全域物件會被 Excel 內容完全覆蓋替換！
+         ************************************************************/
+        let quizDatabase = {
+            "ch1": {
+                "title": "CH1 整數的運算與科學記號",
+                "mcq": [
+                    { "q": "花店老闆每賣出一盆花，就會記錄這筆交易的賺賠情形。他以「＋」表示賺錢，以「－」表示賠錢。若賠了 190 元，應該怎麼記？", "opts": ["＋10 元", "＋190 元", "－10 元", "－190 元"], "ans": 3, "source": "Best 試卷(基礎) 1-1 第 1 題", "hint": "根據題意，「＋」代表賺錢，「－」代表賠錢，因此賠 190 元需使用負號與數值表示。", "exp": "賺記為＋，賠記為－。故賠 190 元記為－190 元。選 D。" },
+                    { "q": "下列各數中，哪一個不是整數？", "opts": ["0", "－2", "5", "2.5"], "ans": 3, "source": "Best 試卷(基礎) 1-1 第 2 題", "hint": "整數包含正整數、零與負整數。小數與分數不屬於整數。", "exp": "2.5 是小數，不是整數。其餘 0, -2, 5 均為整數。選 D。" },
+                    { "q": "數線上 A 點在 1 與 2 之間，將其分成十等分，A 點位於第七格小隔線上。則 A 點所代表的坐標為多少？", "opts": ["1.6", "1.7", "1.8", "1.9"], "ans": 1, "source": "Best 試卷(基礎) 1-1 第 3 題", "hint": "數線上 1 與 2 之間均分十等分，每等分為 0.1，第七格即為 1 + 0.7 = 1.7。", "exp": "從 1 往右數 7 格，每一格代表 0.1。故坐標為 1.7。選 B。" },
+                    { "q": "有一個數不比 2 大，也不比 2 小，則該數為多少？", "opts": ["0", "2", "－2", "3"], "ans": 1, "source": "Best 試卷(基礎) 1-1 第 4 題", "hint": "不比 2 大代表「小於或等於 2」；不比 2 小代表「大於或等於 2」。兩者同時成立即為該數本身。", "exp": "不比 2 大且不比 2 小，代表該數只能為 2。選 B。" },
+                    { "q": "下列數值中，哪一個不是絕對值小於 3 的整數？", "opts": ["0", "－1", "2", "－4"], "ans": 3, "source": "Best 試卷(基礎) 1-1 第 5 題", "hint": "絕對值小於 3 的整數包括：-2, -1, 0, 1, 2。請檢查選項中哪個數字的絕對值大於 or 等於 3。", "exp": "｜－4｜＝ 4 ＞ 3，故 －4 不是絕對值小於 3 的整數。選 D。" },
+                    { "q": "小兔子原本在數線上 (－4) 的位置，後來又往左邊走 6 個單位，則下列哪個選項可以表示這隻小兔子最後的位置？", "opts": ["(－4)＋(－6)", "(－4)＋6", "4＋(－6)", "4＋6"], "ans": 0, "source": "Best 試卷(基礎) 1-2 第 1 題", "hint": "在數線上「往左走」代表減去或加上一個負數。從 -4 往左走 6 個單位，應如何列式？", "exp": "往左走 6 單位代表加上 －6。故最後位置表示為 (－4) ＋ (－6) ＝ －10。選 A。" },
+                    { "q": "數線上 A(－7)、B(5) 兩點，則 A、B 兩點的距離 AB 為多少？", "opts": ["－2", "2", "－12", "12"], "ans": 3, "source": "Best 試卷(基礎) 1-2 第 5 題", "hint": "數線上兩點的距離是這兩點坐標差的絕對值。算式為：｜5 － (－7)｜。", "exp": "AB 距離 ＝ ｜5 － (－7)｜ ＝ ｜5 ＋ 7｜ ＝ 12。選 D。" },
+                    { "q": "數線上 A(6)、B(－8)、C(c) 三點，若 C 為 A、B 的中點，則 c 為多少？", "opts": ["－1", "0", "1", "－2"], "ans": 0, "source": "Best 試卷(基礎) 1-2 第 6 題", "hint": "求中點坐標的公式：兩點坐標相加除以 2。即為 (6 + (－8)) ÷ 2。", "exp": "中點 c ＝ [6 ＋ (－8)] ÷ 2 ＝ (－2) ÷ 2 ＝ －1。選 A。" },
+                    { "q": "小豪投擲一枚硬幣並移動數線上的棋子。棋子起點在原點，出現正面往右移動 2 個單位，出現反面往左移動 3 個單位。小豪共投擲 20 次，其中出現 9 次正面，則棋子最後的位置在哪？", "opts": ["15", "－15", "5", "－5"], "ans": 1, "source": "Best 試卷(基礎) 1-3 第 6 題", "hint": "投擲 20 次，其中 9 次正面，則反面次數為 20 － 9 ＝ 11 次。利用 9 次正面（每次+2）與 11 次反面（每次-3）計算總移動位置。", "exp": "正面 9 次、反面 11 次。最後位置 ＝ 9 × 2 ＋ 11 × (－3) ＝ 18 － 33 ＝ －15。選 B。" },
+                    { "q": "算式 1 ＋ ｜(－5) － (－3)｜之值為何？", "opts": ["3", "9", "－1", "－7"], "ans": 0, "source": "歷屆試題 1-2 第 1 題 (會 111 補考)", "hint": "先算絕對值內部的減法，注意負負得正。 ｜－5 － (－3)｜ ＝ ｜－5 ＋ 3｜ ＝ ｜－2｜。", "exp": "原式 ＝ 1 ＋ ｜－2｜ ＝ 1 ＋ 2 ＝ 3。選 A。" }
+                ],
+                "nonMcq": [
+                    {
+                        "q": "使用小型計算機，計算 \((－3)^5\) 時，可如此按鍵：□3、□+/-、□y^x、□5，最後按□=。若按□1、□1、□2、□+/-、□y^x 各一次（次序自設）再按=，能得到的<b>最小數</b>是多少？請寫出過程與答案。",
+                        "source": "會考非選模擬篇 CH1 第 1 題",
+                        "hint": "欲在計算機上得到最小數（絕對值極大的負值），應透過按鍵拼出底數為負數、指數為奇數的乘方，例如 \(－2^{11}\)。",
+                        "exp": "按鍵次序為□2、□+/-、□y^x、□1、□1、□=，即為算式 \(－2^{11} ＝ －2048\)。",
+                        "rubric": [
+                            "3 分：算式正確且求解過程合理，答案為 -2048 完整正確。",
+                            "2 分：算式正確，求解合理但出現計算錯誤，或部分步驟未呈現其相關性。",
+                            "1 分：算式只正確表示題目中部分數之關係，無完整求解過程。",
+                            "0 分：空白或僅有答案，無任何合理之算式過程。"
+                        ]
+                    },
+                    {
+                        "q": "小宣某次段考的分數，若以 75 分為基準，各科得分與基準比較如下表：國文(-5)、英文(-8)、數學(0)、自然(+25)、社會(+15)。已知社會科的實際分數為 90 分。請問小宣英文科與自然科的實際分數分別是多少分？請列式寫出計算過程。",
+                        "source": "Best 試卷(基礎) 1-1 計算題 1",
+                        "hint": "社會記為 +15 對應實際分數為 90 分（75 + 15 = 90）。英文記為 -8，代表比基準少 8 分；自然記為 +25，代表比基準多 25 分。直接以基準分數加減各科的比較值即可。",
+                        "exp": "基準分數 ＝ 75 分。<br>1. 英文科實際分數 ＝ 75 － 8 ＝ 67 分。<br>2. 自然科實際分數 ＝ 75 ＋ 25 ＝ 100 分。",
+                        "rubric": [
+                            "3 分：解題策略適切，列式與求解過程完整，答案正確（英文67分，自然100分）。",
+                            "2 分：能列出正確算式，但其中一科計算筆誤。",
+                            "1 分：僅算出基準分數 75 分，或算式僅完成一半。",
+                            "0 分：空白或與題目完全無關。"
+                        ]
+                    }
+                ]
+            },
+            "ch2": {
+                "title": "CH2 分數的運算（含因倍數）",
+                "mcq": [
+                    { "q": "有一正整數 N 的所有因數由小到大排列如下：1、2、a、6、9、b。則 a ＋ b ＝ ？", "opts": ["15", "18", "21", "24"], "ans": 2, "source": "Best 試卷(基礎) 2-1 第 1 題", "hint": "因數排列具有對稱性。頭尾乘積（1 × b）等於第二個與倒數第二個乘積（2 × 9）＝ N。由此可求出 N 的值，再找出 a 與 b。", "exp": "由排列對稱性，N ＝ 2 × 9 ＝ 18。故 N 的所有因數為 1, 2, 3, 6, 9, 18。比對可知 a ＝ 3, b ＝ 18，a ＋ b ＝ 3 ＋ 18 ＝ 21。選 C。" },
+                    { "q": "若 n 是正整數，且 \(\frac{48}{n}\) 也是正整數，則 n 不可能是下列哪一個數？", "opts": ["2", "3", "6", "7"], "ans": 3, "source": "Best 試卷(基礎) 2-1 第 2 題", "hint": "\(\frac{48}{n}\) 是正整數，代表 n 必須是 48 的正因數。檢查選項中哪一個數字不能整除 48。", "exp": "48 不能被 7 整除，故 n 不可能是 7。選 D。" },
+                    { "q": "已知四位數 202□ 是 5 的倍數，但不是 2 的倍數，則 □ 可填入的數為何？", "opts": ["0", "2", "4", "5"], "ans": 3, "source": "Best 試卷(基礎) 2-1 第 3 題", "hint": "5 的倍數個位數（□）只能是 0 或 5；而「不是 2 的倍數」排除偶數（0），故個位數只能選奇數。", "exp": "5 的倍數尾數為 0 或 5。非 2 的倍數排除尾數為 0（偶數），故 □ 只能填入 5。選 D。" },
+                    { "q": "下列各分數中，何者最大？", "opts": ["\(-1\frac{2}{5}\)", "\(-1\frac{2}{7}\)", "\(-2\frac{1}{9}\)", "\(-1\frac{1}{3}\)"], "ans": 1, "source": "Best 試卷(基礎) 2-3 第 3 題", "hint": "負數比較大小時，絕對值（去掉負號後的數值）越小的數，其值反而越大。先比較各數去負號後的大小關係。", "exp": "各數絕對值為 \(1\frac{2}{7} < 1\frac{1}{3} < 1\frac{2}{5} < 2\frac{1}{9}\)。因為 \(1\frac{2}{7}\) 絕對值最小，故加上負號後為最大。選 B。" },
+                    { "q": "下列哪一個數為 －3 的倒數？", "opts": ["3", "\(-\frac{1}{3}\)", "－3", "\(\frac{1}{3}\)"], "ans": 1, "source": "Best 試卷(基礎) 2-3 第 6 題", "hint": "兩數相乘之積為 1 時，互為倒數。負數的倒數依然是負數。", "exp": "－3 × (\(-\frac{1}{3}\)) ＝ 1，故其倒數為 \(-\frac{1}{3}\)。選 B。" }
+                ],
+                "nonMcq": [
+                    {
+                        "q": "三條繩子長度分別為 a 公分、b 公分與 252 公分。今將它們剪成等長的整數公分繩段，共得 30 段。若每段長度介於 20 到 40 公分之間，求 a+b 的可能值為何？",
+                        "source": "會考非選模擬篇 CH2 第 1 題",
+                        "hint": "剪成的每段長度必須是 252 的正因數，且在 20～40 公分之間。先找出這個範圍內 252 的因數（21, 28, 36），再分別計算 252 剪出的段數，從而得出 a 與 b 共剪成的段數並求 a+b。",
+                        "exp": "252 介於 20～40 的因數有：21、28、36 公分。<br>(1) 若每段長 21 公分：\(252 ÷ 21 = 12\) 段，則 a 與 b 共剪成 \(30 - 12 = 18\) 段，\(a+b = 21 × 18 = 378\)。<br>(2) 若每段長 28 公分：\(252 ÷ 28 = 9\) 段，則 a 與 b 共剪成 \(30 - 9 = 21\) 段，\(a+b = 28 × 21 = 588\)。<br>(3) 若每段長 36 公分：\(252 ÷ 36 = 7\) 段，則 a 與 b 共剪成 \(30 - 7 = 23\) 段，\(a+b = 36 × 23 = 828\)。<br>答：a+b 的可能值為 378、588 或 828。",
+                        "rubric": [
+                            "3 分: 觀念正確，找出三個因數並完整討論出 3 種對應的 a+b 值（378, 588, 828）。",
+                            "2 分: 能列出因數並大致完整解題，但其中一種狀況計算筆誤，或僅完整寫出 2 種狀況。",
+                            "1 分: 僅列出因數 21、28、36 但未能做後續狀況分析，或僅完整列出 1 狀況。",
+                            "0 分: 空白或與題目無關。"
+                        ]
+                    },
+                    {
+                        "q": "有 9 個裝有卡片的袋子，分別裝有 11、12、13、14、22、31、41、42、53 張卡片。若甲和乙共買了其中 8 袋，且甲的卡片總數是乙卡片總數的 4 倍，則剩下的那一袋有多少張卡片？",
+                        "source": "會考非選模擬篇 CH2 第 3 題",
+                        "hint": "甲的卡片總數是乙的 4 倍，代表兩人買下的 8 袋卡片總和必須是 \(4 + 1 ＝ 5\) 的倍數。先求出 9 袋卡片的總和，再檢查扣除哪一袋後的數量可以被 5 整除。",
+                        "exp": "1. 9 袋卡片總數為 \(11＋12＋13＋14＋22＋31＋41＋42＋53 ＝ 239\) 張。<br>2. 設剩下的一袋為 x 張。則 \(239 － x\) 必須是 5 的倍數。<br>3. 檢查各袋數量，當 \(x ＝ 14\) 時，\(239 － 14 ＝ 225\) 為 5 的倍數。<br>答：剩下的一袋有 14 張卡片。",
+                        "rubric": [
+                            "3 分: 觀念完全正確，利用 5 的倍數特性列式，且求出答案 14 完整無誤。",
+                            "2 分: 算對 9 袋總和 239，但未能成功利用倍數概念篩選出正確的 14 張。",
+                            "1 分: 僅知道甲乙卡片和為 5 的倍數，未能算出總和與進行剩餘判定。",
+                            "0 分: 空白或僅猜出數字無推導理由。"
+                        ]
+                    }
+                ]
+            },
+            "ch3": {
+                "title": "CH3 一元一次方程式與應用問題",
+                "mcq": [
+                    { "q": "有一個代數式 \(x \times (－8) － 8\) 可簡記為下列何者？", "opts": ["－16x", "－8x－8", "0", "x"], "ans": 1, "source": "Best 試卷(基礎) 3-1 第 2 題", "hint": "代數式的乘法簡記規則：數字在前，字母在後，且乘號可省略。減號則維持原樣。", "exp": "\(x \times (－8) － 8\) 可以簡寫為 \(－8x － 8\)。選項 A 將常數與未知數相加是錯誤的。選 B。" },
+                    { "q": "有一個代數式 \(y \div (－3) － 4\) 可簡記為下列何者？", "opts": ["\(-\frac{1}{3y} - 4\)", "\(-\frac{y}{7}\)", "\(-\frac{1}{7y}\)", "\(-\frac{y}{3} - 4\)"], "ans": 3, "source": "Best 試卷(基礎) 3-1 第 4 題", "hint": "除以一個數，可以寫成乘以該數的倒數。\(y \div (－3)\) 可以記為 \(-\frac{y}{3}\)。", "exp": "\(y \div (－3) － 4\) 簡記為 \(-\frac{y}{3} － 4\)。選 D。" },
+                    { "q": "若一瓶汽水為 a 元，果汁比汽水貴 10 元，則一瓶果汁多少元？", "opts": ["10a", "a＋10", "10x", "x＋10"], "ans": 1, "source": "Best 試卷(基礎) 3-1 第 3 題", "hint": "「比...貴 10 元」代表比原價多 10 元，故以加法表示數值關係。", "exp": "汽水為 a 元，果汁比汽水貴 10 元，故果汁為 a ＋ 10 元。選 B。" },
+                    { "q": "書局舉辦開學祭，原價為 x 元的書都改以 \((\frac{4}{5}x－20)\) 元出售。若小豪買一本原價 300 元的書，則他應該付多少元？", "opts": ["220 元", "240 元", "260 元", "280 元"], "ans": 0, "source": "Best 試卷(基礎) 3-1 第 8 題", "hint": "將原價 \(x = 300\) 代入代數式 \(\frac{4}{5}x－20\) 中進行計算。", "exp": "將 \(x ＝ 300\) 代入：\(\frac{4}{5} \times 300 － 20 ＝ 240 － 20 ＝ 220\) 元。選 A。" },
+                    { "q": "爸爸買了 5 個麵包，每個都是 x 元，另外又買了 100 元的牛奶，結帳時共付了 400 元，依題意可列出一元一次方程式為何？", "opts": ["5x＋100＝400", "5x＋400＝100", "500＋x＝400", "5x＋100＋400"], "ans": 0, "source": "Best 試卷(基礎) 3-2 第 6 題", "hint": "麵包總價（5 個每個 x 元）加上牛奶金額（100 元）必須等於結帳總付金額（400 元）。", "exp": "5 個麵包共 5x 元，加牛奶 100 元，總共為 5x ＋ 100 ＝ 400。選 A。" }
+                ],
+                "nonMcq": [
+                    {
+                        "q": "如圖，有大、小兩個長方形，其重疊部分的面積占大長方形面積的 \(\frac{1}{8}\)，且占小長方形面積的 \(\frac{3}{5}\)，未重疊部分（扣除鋪色面積）的總面積為 115，試求小長方形的面積為多少？",
+                        "source": "會考非選模擬篇 CH3 第 1 題",
+                        "hint": "設小長方形面積為 x。重疊面積可表示為 \(\frac{3}{5}x\)。因為該重疊占大長方形的 \(\frac{1}{8}\)，所以大長方形面積為 \(\frac{24}{5}x\)。將兩長方形各自扣除重疊後的面積相加等於 115 求解。",
+                        "exp": "設小長方形面積為 x，則重疊面積 ＝ \(\frac{3}{5}x\)，大長方形面積 ＝ \(\frac{3}{5}x \times 8 ＝ \frac{24}{5}x\)。<br>未重疊部分總面積 ＝ 大未重疊 ＋ 小未重疊 ＝ \(\frac{24}{5}x \times (1 - \frac{1}{8}) ＋ x \times (1 - \frac{3}{5}) ＝ 115\)<br>\(\frac{24}{5}x \times \frac{7}{8} ＋ \frac{2}{5}x ＝ 115\) ⇒ \(\frac{21}{5}x ＋ \frac{2}{5}x ＝ 115\) ⇒ \(\frac{23}{5}x ＝ 115\) ⇒ \(x ＝ 25\)。<br>答：小長方形面積為 25。",
+                        "rubric": [
+                            "3 分: 解題策略適切，列式與求解過程合理完整，答案 25 正確無誤。",
+                            "2 分: 能正確列出一元一次方程式，但在去分母或移項化簡時出現計算錯誤。",
+                            "1 分: 未能列出正確方程式，但能藉由重疊比例正確表達大、小長方形面積的倍數關係。",
+                            "0 分: 空白或與題目無關。"
+                        ]
+                    },
+                    {
+                        "q": "王老師將班上的學生等分成甲、乙、丙三組，後來又將甲組人數的 \(\frac{1}{4}\) 移到乙組，並將乙組中的 4 人移到丙組，最後丙組的總人數比乙組的 2 倍少 6 人。若全班共有 x 位學生，請依題意列出正確 the 方程式，並求出 x 之值。",
+                        "source": "會考非選模擬篇 CH3 第 3 題",
+                        "hint": "一開始每組均為 \(\frac{x}{3}\) 人。依人數移動的邏輯寫出變動後各組人數的代數式，再根據「丙組人數 ＝ 2 × 乙組人數 － 6」列出方程式求出全班人數 x。",
+                        "exp": "原來三組人數皆為 \(\frac{x}{3}\) 人。<br>移動後：<br>甲組剩下：\(\frac{x}{3} \times (1 - \frac{1}{4}) = \frac{x}{4}\) 人。<br>乙組變為：\(\frac{x}{3} ＋ \frac{x}{12} － 4 = \frac{5}{12}x － 4\) 人。<br>丙組變為：\(\frac{x}{3} ＋ 4\) 人。<br>依題意列式：\(\frac{x}{3} ＋ 4 ＝ 2(\frac{5}{12}x － 4) － 6\)<br>同乘以 12 展開：\(4x ＋ 48 ＝ 10x － 168\) ⇒ \(6x ＝ 216\) ⇒ \(x ＝ 36\)。<br>答：全班共有 36 人。",
+                        "rubric": [
+                            "3 分: 解題策略完全正確，方程式列式無誤且求得 x = 36。",
+                            "2 分: 列式正確，但求解過程中因去分母或移項計算錯誤。",
+                            "1 分: 能寫出乙、丙組的代數表示式，但未能列出正確方程式。",
+                            "0 分: 空白或僅寫答案無推導過程。"
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // 全域變數
+        let currentChapter = "";
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let userMcqAnswers = []; // 儲存選擇題的答題細節對象
+        let userNonMcqAnswers = []; // 儲存非選題學生的文字回答
+
+        // 初始化：渲染章節選擇
+        function initQuizSetup() {
+            document.getElementById('setup-screen').classList.remove('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            
+            const listDiv = document.getElementById('chapter-list');
+            listDiv.innerHTML = "";
+            
+            for (let chKey in quizDatabase) {
+                const ch = quizDatabase[chKey];
+                const btn = document.createElement('button');
+                btn.className = "p-6 border border-slate-200 bg-white rounded-2xl text-left hover:border-blue-500 hover:bg-blue-50/30 transition-all group flex flex-col justify-between shadow-sm hover:shadow-md h-full";
+                btn.onclick = () => startQuiz(chKey);
+                btn.innerHTML = `
+                    <div class="mb-4">
+                        <h3 class="font-bold text-slate-800 text-lg group-hover:text-blue-600 transition-colors">${ch.title}</h3>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">挑戰包含本章隨機挑選之精選會考、基測與非選題目，具備錯題檢修解析。</p>
+                    </div>
+                    <div class="w-full flex justify-between items-center pt-3 border-t border-slate-100">
+                        <span class="text-xs font-semibold text-slate-500">題庫規模：${ch.mcq.length} 選擇 / ${ch.nonMcq.length} 非選</span>
+                        <span class="text-blue-600 font-bold text-sm group-hover:translate-x-1 transition-transform">挑戰 →</span>
+                    </div>
+                `;
+                listDiv.appendChild(btn);
+            }
+        }
+
+        // 解析上傳的 Excel 檔案
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    // 讀取第一個工作表
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // 轉成 JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    if (jsonData.length === 0) {
+                        alert("Excel 檔案中沒有找到資料，請檢查工作表與欄位格式。");
+                        return;
+                    }
+                    
+                    // 解析欄位並構建全新 quizDatabase
+                    const newDb = {};
+                    let successCount = 0;
+                    
+                    jsonData.forEach((row, idx) => {
+                        // 必要欄位檢核
+                        const chapterId = row["章節代號"] ? String(row["章節代號"]).trim() : null;
+                        const chapterTitle = row["章節名稱"] ? String(row["章節名稱"]).trim() : null;
+                        const qText = row["題目"] ? String(row["題目"]).trim() : null;
+                        const qType = row["題型"] ? String(row["題型"]).trim() : null; // "選擇題" 或 "非選擇題"
+                        
+                        if (!chapterId || !chapterTitle || !qText || !qType) {
+                            return; // 略過無效列
+                        }
+                        
+                        // 初始化章節
+                        if (!newDb[chapterId]) {
+                            newDb[chapterId] = {
+                                "title": chapterTitle,
+                                "mcq": [],
+                                "nonMcq": []
+                            };
+                        }
+                        
+                        if (qType === "選擇題") {
+                            // 解析 A/B/C/D 正確答案索引
+                            let ansIdx = 0;
+                            const ansRaw = row["正確答案"] ? String(row["正確答案"]).trim().toUpperCase() : "A";
+                            if (ansRaw === "A" || ansRaw === "1" || ansRaw === "0") ansIdx = 0;
+                            else if (ansRaw === "B" || ansRaw === "2" || ansRaw === "1") ansIdx = 1;
+                            else if (ansRaw === "C" || ansRaw === "3" || ansRaw === "2") ansIdx = 2;
+                            else if (ansRaw === "D" || ansRaw === "4" || ansRaw === "3") ansIdx = 3;
+                            
+                            newDb[chapterId].mcq.push({
+                                "q": qText,
+                                "opts": [
+                                    row["選項A"] ? String(row["選項A"]).trim() : "未設定選項 A",
+                                    row["選項B"] ? String(row["選項B"]).trim() : "未設定選項 B",
+                                    row["選項C"] ? String(row["選項C"]).trim() : "未設定選項 C",
+                                    row["選項D"] ? String(row["選項D"]).trim() : "未設定選項 D"
+                                ],
+                                "ans": ansIdx,
+                                "source": row["試題來源"] ? String(row["試題來源"]).trim() : "外部 Excel 題庫",
+                                "hint": row["解題提示"] ? String(row["解題提示"]).trim() : "",
+                                "exp": row["詳解與觀念重建"] ? String(row["詳解與觀念重建"]).trim() : "尚無解析說明。"
+                            });
+                        } else {
+                            // 非選擇題
+                            let rubricArr = [];
+                            if (row["自評評分標準"]) {
+                                rubricArr = String(row["自評評分標準"]).split(/[
+;；\+]+/).map(s => s.trim()).filter(s => s.length > 0);
+                            }
+                            if (rubricArr.length === 0) {
+                                rubricArr = [
+                                    "3 分：列式與求解步驟完全正確。",
+                                    "2 分：列式正確但部分計算有筆誤。",
+                                    "1 分：僅能列出部分關係式，解題思路不完整。"
+                                ];
+                            }
+                            
+                            newDb[chapterId].nonMcq.push({
+                                "q": qText,
+                                "source": row["試題來源"] ? String(row["試題來源"]).trim() : "外部 Excel 題庫",
+                                "hint": row["解題提示"] ? String(row["解題提示"]).trim() : "",
+                                "exp": row["詳解與觀念重建"] ? String(row["詳解與觀念重建"]).trim() : "尚無解析說明。",
+                                "rubric": rubricArr
+                            });
+                        }
+                        successCount++;
+                    });
+                    
+                    const finalChapters = Object.keys(newDb);
+                    if (finalChapters.length === 0) {
+                        alert("雖然成功讀取到 Excel，但無任何列完全符合欄位規範。請檢查欄位標題與內容是否正確！");
+                        return;
+                    }
+                    
+                    // 替換全域題庫
+                    quizDatabase = newDb;
+                    
+                    // 更新介面狀態
+                    document.getElementById('excel-status').innerHTML = `
+                        <span class="text-emerald-600 font-bold">✓ 匯入成功！共載入 ${finalChapters.length} 個自訂單元，共計 ${successCount} 道試題。</span>
+                    `;
+                    
+                    // 重新渲染主頁面
+                    initQuizSetup();
+                    
+                } catch(error) {
+                    console.error(error);
+                    alert("解析 Excel 檔案時發生錯誤。請確認您的檔案並非損毀，且符合規定的工作表格式！");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 隨機自陣列挑戰隨機 N 個元素 (Fisher-Yates Shuffle 演算法)
+        function getRandomSubset(arr, n) {
+            let shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled.slice(0, n);
+        }
+
+        // 開始測驗：組裝試卷 (隨機抽取 15選擇 + 5非選，若不夠則全抽)
+        function startQuiz(chapterKey) {
+            currentChapter = chapterKey;
+            const chData = quizDatabase[chapterKey];
+            
+            // 隨機抽題（如果 Excel 匯入的題目不夠，會自動調整大小）
+            const maxMcq = Math.min(chData.mcq.length, 15);
+            const maxNon = Math.min(chData.nonMcq.length, 5);
+            
+            const selectedMcq = getRandomSubset(chData.mcq, maxMcq).map(q => ({ ...q, type: 'mcq' }));
+            const selectedNonMcq = getRandomSubset(chData.nonMcq, maxNon).map(q => ({ ...q, type: 'nonMcq' }));
+            
+            currentQuestions = [...selectedMcq, ...selectedNonMcq];
+            currentQuestionIndex = 0;
+            userMcqAnswers = [];
+            userNonMcqAnswers = [];
+
+            if(currentQuestions.length === 0) {
+                alert("該單元目前沒有題目，請確認 Excel 中是否有正確標註此章節。");
+                return;
+            }
+
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        // 顯示當前題目
+        function showQuestion() {
+            const q = currentQuestions[currentQuestionIndex];
+            
+            // 重置提示與顯示狀態
+            document.getElementById('hint-area').classList.add('hidden');
+            document.getElementById('hint-btn').classList.add('hidden');
+            document.getElementById('hint-placeholder').classList.remove('hidden');
+
+            // 更新進度條與題號
+            const progress = ((currentQuestionIndex) / currentQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            
+            const totalMcq = currentQuestions.filter(x => x.type === 'mcq').length;
+            const totalNon = currentQuestions.filter(x => x.type === 'nonMcq').length;
+            const qTypeLabel = q.type === 'mcq' 
+                ? `【選擇題】第 ${currentQuestionIndex + 1}/${totalMcq} 題` 
+                : `【非選擇題】第 ${currentQuestionIndex + 1 - totalMcq}/${totalNon} 題`;
+            document.getElementById('question-index').textContent = qTypeLabel;
+
+            // 顯示試題來源
+            const sourceDiv = document.getElementById('question-source');
+            sourceDiv.textContent = `試題來源：${q.source || "自訂題庫匯入"}`;
+
+            // 填入題目內容
+            const contentDiv = document.getElementById('question-content');
+            contentDiv.innerHTML = `<h3 class="text-lg font-medium text-slate-800 leading-relaxed">${q.q}</h3>`;
+
+            // 設定「顯示提示」按鈕
+            if (q.hint && q.hint.trim().length > 0) {
+                const hintBtn = document.getElementById('hint-btn');
+                const hintArea = document.getElementById('hint-area');
+                
+                hintBtn.classList.remove('hidden');
+                document.getElementById('hint-placeholder').classList.add('hidden');
+
+                hintArea.innerHTML = `
+                    <div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-xs leading-relaxed flex items-start gap-2.5">
+                        <span class="text-base mt-0.5">💡</span>
+                        <div>
+                            <strong class="block mb-1 text-amber-900">思維導引提示：</strong>
+                            <span>${q.hint}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 切換選擇題或非選擇題之答題面板
+            const mcqDiv = document.getElementById('mcq-options');
+            const nonMcqDiv = document.getElementById('non-mcq-area');
+            
+            if (q.type === 'mcq') {
+                mcqDiv.classList.remove('hidden');
+                nonMcqDiv.classList.add('hidden');
+                
+                // 動態產生 4 個選項
+                mcqDiv.innerHTML = "";
+                q.opts.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-4 border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 bg-white transition-all flex items-center gap-3";
+                    btn.onclick = () => selectMcqOption(index, btn);
+                    btn.innerHTML = `
+                        <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">${String.fromCharCode(65 + index)}</span>
+                        <span>${opt}</span>
+                    `;
+                    mcqDiv.appendChild(btn);
+                });
+                
+                document.getElementById('next-btn').disabled = true; // 選擇後才能按下一步
+                document.getElementById('next-btn').classList.add('opacity-50');
+            } else {
+                mcqDiv.classList.add('hidden');
+                nonMcqDiv.classList.remove('hidden');
+                
+                // 清空非選輸入框
+                document.getElementById('non-mcq-input').value = "";
+                document.getElementById('next-btn').disabled = false;
+                document.getElementById('next-btn').classList.remove('opacity-50');
+            }
+
+            // 排版渲染數學公式
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // 開關提示視窗
+        function toggleHint() {
+            const hintArea = document.getElementById('hint-area');
+            hintArea.classList.toggle('hidden');
+        }
+
+        // 選擇選擇題選項
+        let selectedOptionIndex = null;
+        function selectMcqOption(index, element) {
+            selectedOptionIndex = index;
+            
+            const buttons = document.getElementById('mcq-options').querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50/50');
+                btn.querySelector('span').classList.remove('bg-blue-600', 'text-white');
+                btn.querySelector('span').classList.add('bg-slate-100', 'text-slate-500');
+            });
+
+            element.classList.add('border-blue-500', 'bg-blue-50/50');
+            element.querySelector('span').classList.remove('bg-slate-100', 'text-slate-500');
+            element.querySelector('span').classList.add('bg-blue-600', 'text-white');
+
+            document.getElementById('next-btn').disabled = false;
+            document.getElementById('next-btn').classList.remove('opacity-50');
+        }
+
+        // 處理「下一題」
+        function handleNext() {
+            const q = currentQuestions[currentQuestionIndex];
+            
+            if (q.type === 'mcq') {
+                const isCorrect = (selectedOptionIndex === q.ans);
+                // 儲存詳細錯題分析物件
+                userMcqAnswers.push({
+                    q: q.q,
+                    opts: q.opts,
+                    userAns: selectedOptionIndex,
+                    correctAns: q.ans,
+                    isCorrect: isCorrect,
+                    exp: q.exp,
+                    source: q.source
+                });
+            } else {
+                const inputVal = document.getElementById('non-mcq-input').value.trim();
+                userNonMcqAnswers.push({
+                    q: q.q,
+                    source: q.source,
+                    userAnswer: inputVal || "（未書寫過程，直接看解答對照）",
+                    exp: q.exp,
+                    rubric: q.rubric
+                });
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < currentQuestions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        // 顯示成績與非選題自評對照
+        function showResult() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            // 1. 計算選擇題得分
+            const correctCount = userMcqAnswers.filter(x => x.isCorrect === true).length;
+            const totalMcq = userMcqAnswers.length;
+            const scorePercentage = totalMcq > 0 ? Math.round((correctCount / totalMcq) * 100) : 0;
+            document.getElementById('score-text').textContent = `${scorePercentage}% (共答對 ${correctCount}/${totalMcq} 題)`;
+
+            // 2. 渲染【❌ 選擇題錯題分析】區塊
+            const wrongAnalysisCard = document.getElementById('wrong-analysis-card');
+            const wrongContainer = document.getElementById('wrong-analysis-container');
+            wrongContainer.innerHTML = "";
+
+            if (totalMcq > 0) {
+                wrongAnalysisCard.classList.remove('hidden');
+                const wrongQuestions = userMcqAnswers.filter(x => !x.isCorrect);
+                
+                if (wrongQuestions.length === 0) {
+                    wrongContainer.innerHTML = `
+                        <div class="text-center py-8 px-4 text-emerald-700 font-semibold bg-emerald-50 rounded-2xl border border-emerald-100 flex flex-col items-center justify-center gap-2">
+                            <span class="text-3xl">🎉</span>
+                            <div>太強了！您在此單元的所有選擇題中拿到滿分，沒有任何錯題！</div>
+                            <span class="text-xs font-normal text-slate-400 leading-relaxed">100% 答對率，概念無懈可擊，繼續保持！</span>
+                        </div>
+                    `;
+                } else {
+                    wrongQuestions.forEach((item, index) => {
+                        const card = document.createElement('div');
+                        card.className = "p-5 border border-red-100 bg-red-50/10 rounded-2xl space-y-3";
+                        card.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <span class="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-md">第 ${index + 1} 題 錯題檢修</span>
+                                <span class="text-xs text-slate-400">來源：${item.source}</span>
+                            </div>
+                            <div class="text-sm font-medium text-slate-800 leading-relaxed">${item.q}</div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
+                                <div class="p-3 rounded-xl bg-red-50 border border-red-100/50 text-red-800 flex items-start gap-1.5">
+                                    <span class="text-base leading-none">❌</span>
+                                    <div>
+                                        <strong>您的答案：</strong>(${String.fromCharCode(65 + item.userAns)}) ${item.opts[item.userAns]}
+                                    </div>
+                                </div>
+                                <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100/50 text-emerald-800 flex items-start gap-1.5">
+                                    <span class="text-base leading-none">✅</span>
+                                    <div>
+                                        <strong>正確答案：</strong>(${String.fromCharCode(65 + item.correctAns)}) ${item.opts[item.correctAns]}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-700 leading-relaxed">
+                                <strong class="text-slate-900 block mb-1">💡 錯題觀念解析：</strong>
+                                ${item.exp}
+                            </div>
+                        `;
+                        wrongContainer.appendChild(card);
+                    });
+                }
+            } else {
+                wrongAnalysisCard.classList.add('hidden');
+            }
+
+            // 3. 渲染【📝 非選擇題自評】區塊
+            const nonMcqCard = document.getElementById('non-mcq-card');
+            const container = document.getElementById('self-eval-container');
+            container.innerHTML = "";
+
+            if (userNonMcqAnswers.length > 0) {
+                nonMcqCard.classList.remove('hidden');
+                userNonMcqAnswers.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = "pt-6 first:pt-0 space-y-4";
+                    
+                    let rubricHtml = "";
+                    if (item.rubric) {
+                        item.rubric.forEach(step => {
+                            rubricHtml += `<li class="text-xs text-slate-600 list-disc ml-4 mt-1">${step}</li>`;
+                        });
+                    } else {
+                        rubricHtml = `<li class="text-xs text-slate-400 list-none italic">本題未設定三點指標，請直接參考解析。</li>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="inline-block bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded">非選第 ${index + 1} 題</span>
+                                <span class="text-xs text-slate-400">來源：${item.source}</span>
+                            </div>
+                            <div class="text-sm font-medium text-slate-800 leading-relaxed">${item.q}</div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="border border-amber-100 bg-amber-50/20 p-4 rounded-xl">
+                                <span class="text-xs font-bold text-amber-700">✍️ 您的解題紀錄：</span>
+                                <pre class="text-xs text-slate-700 mt-2 whitespace-pre-wrap font-sans bg-white p-3 rounded border border-amber-100/50">${item.userAnswer}</pre>
+                            </div>
+                            <div class="border border-emerald-100 bg-emerald-50/20 p-4 rounded-xl font-sans">
+                                <span class="text-xs font-bold text-emerald-700">💡 官方參考詳解與思維：</span>
+                                <div class="text-xs text-slate-700 mt-2 bg-white p-3 rounded border border-emerald-100/50 leading-relaxed">${item.exp}</div>
+                            </div>
+                        </div>
+
+                        <div class="border border-slate-200 p-4 rounded-xl bg-slate-100/30">
+                            <span class="text-xs font-bold text-slate-500 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                                會考非選評分標準對照（三點評分指引）
+                            </span>
+                            <ul class="mt-2 space-y-1">
+                                ${rubricHtml}
+                            </ul>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                nonMcqCard.classList.add('hidden');
+            }
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // 防呆離開提示
+        function confirmExit() {
+            if(confirm("確定要放棄本次測驗並返回首頁嗎？目前的答題進度將不會被儲存。")) {
+                initQuizSetup();
+            }
+        }
+
+        window.onload = initQuizSetup;
+    </script>
+</body>
+</html>
