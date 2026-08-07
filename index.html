@@ -10,7 +10,7 @@
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- 引入 SheetJS 實現在網頁端直接解析 Excel (.xlsx) 檔案 -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
     </style>
@@ -24,7 +24,7 @@
                 <h1 class="text-2xl font-bold">116 國中會考隨機特訓檢測系統</h1>
                 <p class="text-blue-100 text-sm mt-1">支援跨學科、多冊數 • Excel 題庫隨載即測系統</p>
             </div>
-            <span class="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold">116 萬用 Excel 匯入1.0版</span>
+            <span class="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold">116 萬用 Excel 匯入版</span>
         </div>
     </header>
 
@@ -401,8 +401,7 @@
                             // 非選擇題
                             let rubricArr = [];
                             if (row["自評評分標準"]) {
-                                rubricArr = String(row["自評評分標準"]).split(/[
-;；\+]+/).map(s => s.trim()).filter(s => s.length > 0);
+                                rubricArr = String(row["自評評分標準"]).split(/[\n;；\+]+/).map(s => s.trim()).filter(s => s.length > 0);
                             }
                             if (rubricArr.length === 0) {
                                 rubricArr = [
